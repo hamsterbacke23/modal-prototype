@@ -28,26 +28,26 @@ const dialog = useTemplateRef('dialogElement');
 const isClosing = ref(false);
 const shouldShowContent = ref(false);
 
-// Calculate animation duration based on size (150ms - 500ms)
+// Calculate animation duration based on size (100ms - 350ms) - shorter overall
 const animationDuration = computed(() => {
-  if (props.size === 'fullscreen') return 500;
+  if (props.size === 'fullscreen') return 350;
   if (typeof props.size === 'number') {
     const minSize = 400;
     const maxSize = 976;
-    const minDuration = 150;
-    const maxDuration = 400;
+    const minDuration = 100;
+    const maxDuration = 300;
     
     const normalized = (props.size - minSize) / (maxSize - minSize);
     return Math.round(minDuration + normalized * (maxDuration - minDuration));
   }
-  return 300;
+  return 250;
 });
 
-// Scale from value based on size
+// Scale from value based on size - more dramatic for expansion effect
 const scaleFrom = computed(() => {
-  if (props.size === 400) return 0.92;
-  if (props.size === 'fullscreen') return 0.97;
-  return 0.95;
+  if (props.size === 400) return 0.85;
+  if (props.size === 'fullscreen') return 0.92;
+  return 0.88;
 });
 
 // Custom width for non-fullscreen sizes
@@ -91,39 +91,45 @@ watch(
         const duration = animationDuration.value;
         const scale = scaleFrom.value;
         
-        // Set initial state
+        // Set initial state - clipped height with slight scale
         dialogEl.style.transition = 'none';
-        dialogEl.style.opacity = '0';
-        dialogEl.style.transform = `scale(${scale}) translateY(10px)`;
+        dialogEl.style.opacity = '0.7';
+        dialogEl.style.transform = `scale(${scale}) translateY(-10px)`;
+        dialogEl.style.clipPath = 'inset(0 0 70% 0)';
         dialogEl.classList.add('backdrop-entering');
         dialogEl.classList.remove('backdrop-exiting');
         
         void dialogEl.offsetHeight;
         
-        // Animate to final state
+        // Animate to final state - reveal height + scale
         requestAnimationFrame(() => {
-          const scaleDuration = Math.round(duration * 0.6);
-          dialogEl.style.transition = `opacity ${duration}ms cubic-bezier(0.0, 0.0, 0.2, 1), transform ${scaleDuration}ms cubic-bezier(0.0, 0.0, 0.2, 1)`;
+          const opacityDuration = Math.round(duration * 0.2);
+          dialogEl.style.transition = `opacity ${opacityDuration}ms cubic-bezier(0.0, 0.0, 0.2, 1), transform ${duration}ms cubic-bezier(0.0, 0.0, 0.2, 1), clip-path ${duration}ms cubic-bezier(0.0, 0.0, 0.2, 1)`;
           dialogEl.style.opacity = '1';
           dialogEl.style.transform = 'scale(1) translateY(0)';
+          dialogEl.style.clipPath = 'inset(0 0 0% 0)';
         });
       }
     } else if (!isClosing.value) {
       // Closing animation
-      const dialogEl = dialog.value as HTMLDialogElement;
-      if (dialogEl) {
+      const dialogElClose = dialog.value as HTMLDialogElement;
+      if (dialogElClose) {
         isClosing.value = true;
         
         // Exit duration: 67% of entrance
         const exitDuration = Math.round(animationDuration.value * 0.67);
         const scale = scaleFrom.value;
-        const exitScale = 1 - ((1 - scale) * 0.5); // Scale down halfway back
         
-        dialogEl.classList.remove('backdrop-entering');
-        dialogEl.classList.add('backdrop-exiting');
-        dialogEl.style.transition = `opacity ${exitDuration}ms ease-out, transform ${exitDuration}ms ease-out`;
-        dialogEl.style.opacity = '0';
-        dialogEl.style.transform = `scale(${exitScale}) translateY(5px)`;
+        dialogElClose.classList.remove('backdrop-entering');
+        dialogElClose.classList.add('backdrop-exiting');
+        
+        // Collapse height with scale - opacity only at very end
+        const opacityDuration = Math.round(exitDuration * 0.25);
+        const opacityDelay = Math.round(exitDuration * 0.65);
+        dialogElClose.style.transition = `opacity ${opacityDuration}ms ease-out ${opacityDelay}ms, transform ${exitDuration}ms cubic-bezier(0.4, 0.0, 1, 1), clip-path ${exitDuration}ms cubic-bezier(0.4, 0.0, 1, 1)`;
+        dialogElClose.style.opacity = '0';
+        dialogElClose.style.transform = `scale(${scale}) translateY(-10px)`;
+        dialogElClose.style.clipPath = 'inset(0 0 80% 0)';
         
         setTimeout(() => {
           dialog.value?.close();

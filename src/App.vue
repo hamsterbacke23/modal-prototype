@@ -77,16 +77,17 @@ const closeModal = () => {
           <li>Size: {{ modal.size === 'fullscreen' ? 'calc(100vw - 60px)' : `${modal.size}px` }}</li>
           <li>Duration: {{ modal.duration }}</li>
           <li>Easing: Emphasized Decelerate (entrance)</li>
-          <li>Choreography: Scale ({{ modal.size === 400 ? '0.92' : modal.size === 'fullscreen' ? '0.97' : '0.95' }} → 1.0) + Fade + Y-translate</li>
+          <li>Choreography: Height reveal + Scale ({{ modal.size === 400 ? '0.85' : modal.size === 'fullscreen' ? '0.92' : '0.88' }} → 1.0) + Fade</li>
         </ul>
-        <p style="margin-top: 1rem;">
+        <p>
           This modal demonstrates the physics-based animation system where duration
           and intensity scale proportionally with modal size to maintain consistent
           perceived velocity and cognitive continuity.
         </p>
       </div>
-      <template #actions>
-        <KdsButton label="Close" @click="closeModal" />
+      <template #footer>
+        <KdsButton variant="transparent" label="Cancel" @click="closeModal" />
+        <KdsButton variant="filled" label="Submit" @click="closeModal" />
       </template>
     </AnimatedModal>
   </div>
@@ -260,27 +261,27 @@ const closeModal = () => {
 }
 
 .modal-demo-content {
-  padding: var(--kds-spacing-container-1x) 0;
-  line-height: var(--text-medium-line-height);
+  line-height: 1.6;
 }
 
 .modal-demo-content p {
-  line-height: var(--text-medium-line-height);
+  margin: 0 0 var(--kds-spacing-container-1x) 0;
+  line-height: 1.6;
   color: var(--knime-masala);
 }
 
 .modal-demo-content strong {
   color: var(--knime-masala);
-  font-weight: var(--text-medium-weight);
+  font-weight: 600;
 }
 
 .modal-demo-content ul {
   list-style: none;
   padding-left: 0;
-  margin: 0;
+  margin: 0 0 var(--kds-spacing-container-1x) 0;
   display: flex;
   flex-direction: column;
-  gap: var(--kds-spacing-container-0-75x);
+  gap: var(--kds-spacing-container-0-5x);
 }
 
 .modal-demo-content li {
