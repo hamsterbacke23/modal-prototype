@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>Inspect Dialog Structure</h3>
+<p>Open console and click button to see dialog + backdrop structure</p>
+<button onclick="showDialog()">Open Dialog</button>
+
+<dialog id="test">
+  <p>Test content</p>
+  <button onclick="document.getElementById('test').close()">Close</button>
+</dialog>
+
+<script>
+function showDialog() {
+  const dialog = document.getElementById('test');
+  dialog.showModal();
+  
+  console.log('Dialog element:', dialog);
+  console.log('Dialog parent:', dialog.parentElement);
+  console.log('Dialog previousSibling:', dialog.previousElementSibling);
+  console.log('Dialog nextSibling:', dialog.nextElementSibling);
+  console.log('All siblings:', Array.from(dialog.parentElement.children));
+  console.log('Dialog::backdrop exists?', '::backdrop' in dialog);
+}
+</script>
+</body>
+</html>
