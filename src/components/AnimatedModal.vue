@@ -202,6 +202,7 @@ body:has(dialog.animated-modal[open]) {
   border: none;
   border-radius: var(--kds-border-radius-container-0-37x);
   box-shadow: var(--kds-elevation-level-3);
+  transition: width 100ms cubic-bezier(0.4, 0.0, 0.2, 1);
 
   &:not([open]) {
     display: none;

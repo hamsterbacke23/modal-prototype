@@ -4,6 +4,10 @@ import { KdsButton } from '@knime/kds-components';
 import AnimatedModal from './components/AnimatedModal.vue';
 
 const activeModal = ref(null)
+const resizeDemoActive = ref(false)
+const resizeDemoSize = ref(400)
+const resizeDemoContent = ref('small')
+const isTransitioning = ref(false)
 
 const modalSizes = [
   { size: 400, label: 'Small (400px)', description: 'Quick confirmation dialogs', duration: '100ms' },
@@ -13,12 +17,52 @@ const modalSizes = [
   { size: 'fullscreen', label: 'Fullscreen', description: 'Immersive workflows', duration: '350ms' },
 ]
 
+const resizeSizes = [400, 512, 720, 976]
+
 const openModal = (size) => {
   activeModal.value = size
 }
 
 const closeModal = () => {
   activeModal.value = null
+}
+
+const openResizeDemo = () => {
+  resizeDemoActive.value = true
+  resizeDemoSize.value = 400
+  resizeDemoContent.value = 'small'
+}
+
+const closeResizeDemo = () => {
+  resizeDemoActive.value = false
+}
+
+const cycleSize = async () => {
+  if (isTransitioning.value) return
+  
+  const currentIndex = resizeSizes.indexOf(resizeDemoSize.value)
+  const nextIndex = (currentIndex + 1) % resizeSizes.length
+  const nextSize = resizeSizes[nextIndex]
+  
+  isTransitioning.value = true
+  
+  // Fade out content
+  resizeDemoContent.value = 'transitioning'
+  
+  // Wait for fade out (150ms)
+  await new Promise(resolve => setTimeout(resolve, 150))
+  
+  // Change size - let the CSS transition handle it (100ms)
+  resizeDemoSize.value = nextSize
+  
+  // Wait for size transition to complete
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
+  // Fade in new content
+  const sizeLabels = { 400: 'small', 512: 'medium', 720: 'large', 976: 'xlarge' }
+  resizeDemoContent.value = sizeLabels[nextSize]
+  
+  isTransitioning.value = false
 }
 </script>
 
@@ -41,6 +85,23 @@ const closeModal = () => {
       </div>
 
       <div class="modal-grid">
+        <div
+          class="modal-card resize-demo-card"
+          @click="openResizeDemo"
+        >
+          <div class="modal-card-header">
+            <h3>Size Transition Demo</h3>
+            <span class="duration-badge special">🔄</span>
+          </div>
+          <p class="modal-card-description">Smooth size transitions with content fade</p>
+          <KdsButton
+            label="Open Demo"
+            variant="primary"
+            class="trigger-button"
+            @click="openResizeDemo"
+          />
+        </div>
+        
         <div
           v-for="modal in modalSizes"
           :key="modal.size"
@@ -90,6 +151,66 @@ const closeModal = () => {
       <template #footer>
         <KdsButton variant="transparent" label="Cancel" @click="closeModal" />
         <KdsButton variant="filled" label="Submit" @click="closeModal" />
+      </template>
+    </AnimatedModal>
+    
+    <!-- Resize Demo Modal -->
+    <AnimatedModal
+      :active="resizeDemoActive"
+      :size="resizeDemoSize"
+      :title="`Size Transition Demo (${resizeDemoSize}px)`"
+      @close="closeResizeDemo"
+    >
+      <div class="resize-demo-content">
+        <div class="content-section" :class="{ 'active': resizeDemoContent === 'small', 'transitioning': resizeDemoContent === 'transitioning' }">
+          <h3>Small Modal (400px)</h3>
+          <p>This is the smallest size. Perfect for quick confirmations and simple decisions.</p>
+          <p>Content is minimal and focused on a single action or question.</p>
+        </div>
+        
+        <div class="content-section" :class="{ 'active': resizeDemoContent === 'medium', 'transitioning': resizeDemoContent === 'transitioning' }">
+          <h3>Medium Modal (512px)</h3>
+          <p>Standard size for most use cases. Provides enough space for forms and settings.</p>
+          <p>Can accommodate multiple form fields and moderate amounts of text content.</p>
+          <p>This is the default size that works well for most interactions.</p>
+        </div>
+        
+        <div class="content-section" :class="{ 'active': resizeDemoContent === 'large', 'transitioning': resizeDemoContent === 'transitioning' }">
+          <h3>Large Modal (720px)</h3>
+          <p>Expanded size for complex data entry and detailed information displays.</p>
+          <p>Suitable for:</p>
+          <ul>
+            <li>Multi-column layouts</li>
+            <li>Complex forms with many fields</li>
+            <li>Tables with several columns</li>
+            <li>Rich text editors</li>
+          </ul>
+          <p>Provides ample space while maintaining focus on the task.</p>
+        </div>
+        
+        <div class="content-section" :class="{ 'active': resizeDemoContent === 'xlarge', 'transitioning': resizeDemoContent === 'transitioning' }">
+          <h3>XLarge Modal (976px)</h3>
+          <p>Maximum standard size for the most complex interfaces.</p>
+          <p>Ideal for:</p>
+          <ul>
+            <li>Wide data tables</li>
+            <li>Complex review interfaces</li>
+            <li>Multi-panel configurations</li>
+            <li>Advanced settings with preview panes</li>
+          </ul>
+          <p>This size approaches the limit before fullscreen becomes more appropriate.</p>
+          <p>Notice how the content smoothly transitions without any jarring shifts or text reflow.</p>
+        </div>
+      </div>
+      
+      <template #footer>
+        <KdsButton variant="transparent" label="Close" @click="closeResizeDemo" />
+        <KdsButton 
+          variant="filled" 
+          label="Cycle Size" 
+          @click="cycleSize"
+          :disabled="isTransitioning"
+        />
       </template>
     </AnimatedModal>
   </div>
@@ -288,5 +409,77 @@ const closeModal = () => {
 
 .modal-demo-content li {
   color: var(--knime-dove-gray);
+}
+
+.resize-demo-card::before {
+  background: linear-gradient(90deg, 
+    var(--knime-yellow) 0%, 
+    var(--knime-coral) 100%) !important;
+}
+
+.duration-badge.special {
+  background: linear-gradient(135deg, var(--knime-yellow) 0%, var(--knime-coral) 100%);
+}
+
+.resize-demo-content {
+  position: relative;
+  min-height: 400px;
+}
+
+.resize-demo-content .content-section {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 150ms ease-in-out;
+  pointer-events: none;
+}
+
+.resize-demo-content .content-section.active {
+  position: absolute;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.resize-demo-content .content-section.transitioning {
+  opacity: 0;
+}
+
+.resize-demo-content .content-section h3 {
+  margin-top: 0;
+  margin-bottom: var(--kds-spacing-container-1x);
+  color: var(--knime-masala);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.resize-demo-content .content-section p {
+  margin: 0 0 var(--kds-spacing-container-1x) 0;
+  line-height: 1.6;
+  color: var(--knime-masala);
+}
+
+.resize-demo-content .content-section ul {
+  list-style: disc;
+  padding-left: var(--kds-spacing-container-2x);
+  margin: var(--kds-spacing-container-1x) 0;
+}
+
+.resize-demo-content .content-section li {
+  color: var(--knime-dove-gray);
+  margin-bottom: var(--kds-spacing-container-0-5x);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>
