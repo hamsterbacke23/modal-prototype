@@ -6,11 +6,11 @@ import AnimatedModal from './components/AnimatedModal.vue';
 const activeModal = ref(null)
 
 const modalSizes = [
-  { size: 400, label: 'Small (400px)', description: 'Quick confirmation dialogs', duration: '~150ms' },
-  { size: 512, label: 'Medium (512px)', description: 'Standard forms and settings', duration: '~200ms' },
-  { size: 720, label: 'Large (720px)', description: 'Complex data entry', duration: '~300ms' },
-  { size: 976, label: 'XLarge (976px)', description: 'Wide tables and reviews', duration: '~400ms' },
-  { size: 'fullscreen', label: 'Fullscreen', description: 'Immersive workflows', duration: '~500ms' },
+  { size: 400, label: 'Small (400px)', description: 'Quick confirmation dialogs', duration: '100ms' },
+  { size: 512, label: 'Medium (512px)', description: 'Standard forms and settings', duration: '158ms' },
+  { size: 720, label: 'Large (720px)', description: 'Complex data entry', duration: '222ms' },
+  { size: 976, label: 'XLarge (976px)', description: 'Wide tables and reviews', duration: '300ms' },
+  { size: 'fullscreen', label: 'Fullscreen', description: 'Immersive workflows', duration: '350ms' },
 ]
 
 const openModal = (size) => {
@@ -33,9 +33,9 @@ const closeModal = () => {
       <div class="info-panel">
         <h2>Design Principles</h2>
         <ul>
-          <li><strong>Duration Scaling:</strong> Smaller modals = snappier (150ms), larger = smoother (500ms)</li>
+          <li><strong>Duration Scaling:</strong> Smaller modals = snappier (100ms), larger = smoother (350ms)</li>
           <li><strong>Scale + Fade:</strong> Entrance combines opacity and scale for depth perception</li>
-          <li><strong>Asymmetric Timing:</strong> Exits are 33% faster than entrances</li>
+          <li><strong>Asymmetric Timing:</strong> Exits are 33% faster than entrances (67% of entrance duration)</li>
           <li><strong>Reduced Motion:</strong> Respects user accessibility preferences</li>
         </ul>
       </div>
@@ -72,12 +72,14 @@ const closeModal = () => {
       @close="closeModal"
     >
       <div class="modal-demo-content">
+        <p><strong>{{ modal.description }}</strong></p>
         <p><strong>Animation Details:</strong></p>
         <ul>
-          <li>Size: {{ modal.size === 'fullscreen' ? 'calc(100vw - 60px)' : `${modal.size}px` }}</li>
-          <li>Duration: {{ modal.duration }}</li>
-          <li>Easing: Emphasized Decelerate (entrance)</li>
-          <li>Choreography: Height reveal + Scale ({{ modal.size === 400 ? '0.85' : modal.size === 'fullscreen' ? '0.92' : '0.88' }} → 1.0) + Fade</li>
+          <li>Modal Size: {{ modal.size === 'fullscreen' ? 'calc(100vw - 60px)' : `${modal.size}px` }}</li>
+          <li>Entrance Duration: {{ modal.duration.replace('~', '') }}</li>
+          <li>Exit Duration: {{ Math.round(parseInt(modal.duration.replace(/[^\d]/g, '')) * 0.67) }}ms (33% faster)</li>
+          <li>Scale Transform: {{ modal.size === 400 ? '0.85' : modal.size === 'fullscreen' ? '0.92' : '0.88' }} → 1.0</li>
+          <li>Easing: Emphasized Decelerate (entrance), Emphasized Accelerate (exit)</li>
         </ul>
         <p>
           This modal demonstrates the physics-based animation system where duration
